@@ -7,6 +7,101 @@ The following guidelines should be followed when assisting with Salesforce Apex 
 - When the need arises to test a private method, add the `@TestVisible` annotation to the line above the method to be tested's definition. This will effectively make the method `public` for the duration of a unit test. 
 - Utilize private constructors with the `@TestVisible` annotation to provide test-only depencency injection enabled constructors.
 
+## Platform oddities
+- Salesforce projects, while developed locally, must be deployed to an org for testing. 
+- Salesforce requires that All Apex code have an Aggregate code coverage of >= 75%. Writing or refactoring an Apex class therefore means also writing or refactoring the tests.
+- More importantly, regardless of code coverage percentage, I require that *all logic branches* in the code have coverage. 
+- Test classes should follow the naming convetion ClassNameTests. Example: IdServiceTests, or AccountServiceTests
+- Salesforce provides a bash cli tool for interacting with project metadata called `sf`. you may safely assume `sf` is installed.
+- Here are some common `sf` tasks, and when to use them
+    - `sf project deploy start` - This will deploy all metadata in the project directory.
+    - `sf project deploy start -m apexclass:SOMECLASS_WITHOUT_FILE_EXTENSION` - this deploys a specific apex class to the default org
+        - adding `-o nameOfOrg` allows you to specify which org to deploy the metadata to.
+    - `sf org list` - generates a table of orgs and their authentication status that are known to this computer.
+    - adding `--json` to the end of any `sf` command returns the output in machine readable json
+    - `sf project retrieve start -m apexClass:SomeClass_Without_File_Extension` - this retrieves metadata from the org. 
+    - Salesforce metadata is *generally* found in the `force-app/main/default/` directory. `force-app` is in the same directory as this file.
+    - `sf apex test run` - this is the high level command to run when you want to execute an Apex test in an org. 
+    - adding `-h` to a `sf` command, for example `sf apex test run -h` will teach you the options and flags needed to run a given command.
+    - always run `sf apex test run` with the `-c` an `-v` parameters. 
+    - a full list of `sf` functions available through your use of bash can be found by running `sf commands` and you may find `sf commands --json` to be helpful
+- Additionally, Salesforce has added some helper functionality through the projects' `package.json` file. Specifically, the `scripts` child object.
+    - You may wish to use: 
+        - `npm run lint` - this will lint the Javascript for both Aura and LWC components
+        - `npm run test:unit` - this will run the LWC Component Tests.
+        - `npm run test:unit:watch` - this runs the unit tests whenever a components' js changes
+        - `npm run test:unit:debug` - useful for attching a js debugger to the tests to debug logic in realtime.
+        - `npm run test:unit:coverage` - This is the same as `npm run test:unit` but captures unit test coverage. Given a choice, always use the `test:unit:coverage` option.
+        - `npm run prettier` - this runs prettier --write against all the metadata in the org. You should run this whenever you modify metadata files. 
+
+## Architecture Standards
+
+### Naming Conventions and Locations
+- No variable can have less than 3 characters in its name. Examples:
+**Bad**
+Exception e
+Account a
+**Good**
+Exception caughtException
+Account testAccount
+- Apex classes should be placed in relevant sub-folders under the standard `classes` folder based on their type.
+    - Classes extending the `BaseRepo` class, or ending in `Repo` or `Repository` should be placed or moved to the `classes/repositories` folder.
+    - Classes ending in `TriggerHandler` should be placed or moved to the `classes/triggerHandlers` folder.
+    - Classes ending in `Service` should be placed or moved to the `classes/services` folder.
+    - Classes ending in `Tests` should be placed or moved to the `classes/tests` folder.
+    - If a class file contains nothing but an ENUM definiton, it should be palced or moved to the `classes/enums` folder.
+- Class and Method names must be semantically meantiful, and should bias towards longer, more descriptive names rather than shorter ones.
+    - Class names are limited to 40 characters.
+
+### The Repository Patern
+A repository pattern must be used for all Create, Update, Read(Query) and Delete actions: 
+
+- `BaseRepo.cls`: Base class that all repositories extend 
+- Security modes: USER_MODE (enforces permissions) and SYSTEM_MODE (bypasses permissions)
+- Security context enum: ALLOWS_SAFE (default) and ALLOWS_UNSAFE (requires justification)
+- Repositories handle CRUD operations with security enforcement
+- Default to BaseRepo methods that work with SECURITY_ENFORCED
+
+Example repositories:
+- `AccountRepo.cls`: Handles account-related operations
+
+Usage:
+```apex
+// Using with user context (safe)
+AccountRepo repo = new AccountRepo();
+List<Account> accounts = repo.getAccountsByType('Customer');
+
+// Using with system context (unsafe, requires justification)
+AccountRepo repo = new AccountRepo(BaseRepo.SECURITY_CONTEXT.ALLOWS_UNSAFE);
+repo.updateAccounts(accountsToUpdate, 'Batch operation needs system access');
+```
+
+### Service Layer
+Services encapsulate business logic and complex operations:
+
+Example Services
+- `IdService.cls`: Manages generation of IDs
+- `SQIDService.cls`: Handles encoding/decoding of unique IDs
+- `ContractIDService.cls`: Generates unique 12-digit contract numbers
+
+Usage:
+```apex
+// Generate a contract ID
+String contractId = ContractIDService.generateContractNumber();
+```
+
+### Trigger Framework
+- Triggers must contain a bare minimum of logic, and should delgate actual work to a trigger handler class. 
+- Trigger's should contain very little more than the following code, regardless of object
+- Use Custom metadata type (`Metadata_Driven_Trigger__mdt`) to enable/disable triggers
+- Handler classes implement business logic and are referenced by the metadata.
+
+Example:
+```apex
+trigger AccountTrigger on Account(after insert, before insert, after update, before update) {
+    new MetadataTriggerFramework().run();
+}
+```
 
 ## Metadata Standards
 - Use apiVersion 63.0 when creating or modifying *.cls-meta.xml files
