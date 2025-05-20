@@ -1,15 +1,15 @@
 # LLM-Agentic-Code-Instructions
 
-A community-driven repository for best-practice, multi-contributor "instruction" files tailored for Large Language Model (LLM) coding agents like Claude-code, Codex, and others. These files help guide code generation, enforce standards, and improve project consistency when using agentic code tools.
+A community-driven repository for best-practice, multi-contributor "instruction" files tailored for Large Language Model (LLM) coding agents such as Claude-code, Codex, and others. These files help guide code generation, enforce standards, and improve project consistency when using agentic code tools.
 
 ---
 
 ## 🚀 What is This?
 
-This repository is a central place for high-quality, community-curated instruction files that teach LLM-based coding agents how to write code for specific languages, frameworks, or projects.
+This repository is a central location for high-quality, community-curated instruction files that teach LLM-based coding agents how to write code for specific languages, frameworks, or projects.
 
-- **Instruction files** help LLMs like Claude, Codex, etc., generate code that matches your team's standards and practices.
-- Contributions welcome for any language, framework, or use case!
+***Instruction files*** help LLMs like Claude, Codex, and others generate code that matches your team's standards and practices.
+Contributions are welcome for any language, framework, or use case!
 
 ---
 
@@ -24,14 +24,18 @@ This repository is a central place for high-quality, community-curated instructi
 ## 📁 Directory Structure
 
 ```
-instructions/
-  claude/
-    ruby-best-practices.md
-    python-flask-best-practices.md
-  codex/
-    js-react-best-practices.md
-    go-microservices-best-practices.md
-  ...
+ruby/
+  CLAUDE.md
+  AGENT.md
+
+swift/
+  CLAUDE.md
+  AGENT.md
+
+salesforce/
+  CLAUDE.md
+  AGENT.md
+...
 CONTRIBUTING.md
 CODE_OF_CONDUCT.md
 README.md
@@ -46,32 +50,36 @@ README.md
 1. **Where to Place Instruction Files**
    Place relevant instruction files in your project repository under:
    ```
-   /instructions/claude/
+   CLAUDE.md
    ```
-   Example: `/instructions/claude/ruby-best-practices.md`
+   Example: `CLAUDE.md`
 
 2. **How to Use**
-   - When initializing your Claude agent for a project, load or reference the appropriate file(s) from `/instructions/claude/`.
+   - When initializing your Claude agent for a project, load or reference the appropriate file(s) from `/Language-Name/Vendor.md`.
    - Optionally, summarize or paste file contents into Claude's system prompt or context window.
-
-3. **Project-Specific Instructions**
-   - For project-specific conventions, add a file in `/instructions/claude/project-name.md`.
 
 ### For Codex (OpenAI)
 
 1. **Where to Place Instruction Files**
-   Place instruction files in your project repository under:
+   Place instruction files in your project repository root:
    ```
-   /instructions/codex/
+   AGENTS.md
    ```
-   Example: `/instructions/codex/python-flask-best-practices.md`
+   Example: `AGENT.md`
 
-2. **How to Use**
-   - When setting up your prompt, include the most relevant instruction file content at the start of your prompt, or reference it in your application logic.
-   - For best results, keep the instruction files concise and focused.
+2. **How to Use(Advanced)**
+   - place your LLM specific instruction file in the appropriate place within your project directory. For specific instructions per LLM vendor, keep reading.
 
-3. **Project-Specific Instructions**
-   - Add custom files in `/instructions/codex/project-name.md` for unique project standards.
+3. **Vendor Specific Instructions**
+    - **OpenAI Codex**
+        - copy this repo's Language-Name/AGENTS.md file to:
+            - ~/.codex/AGENTS.md - personal global guidance
+            - AGENTS.md at your projects checkout root - shared project notes
+            - AGENTS.md in the current working directory - sub-folder/feature specifics
+    - **Anthropic Claude**
+        - copy this repo's Language-Name/CLAUDE.md file to:
+            - ~/.claude/CLAUDE.md - for personal global inclusion in all projects.
+            - CLAUDE.md in your current projects checkout root - for project specific instruction
 
 ---
 
