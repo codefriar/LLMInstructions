@@ -207,7 +207,7 @@ Test.setMock(HttpCalloutMock.class, seriesOfMocks);
 ## Best Practices
 
 ### ApexAssertionsShouldIncludeMessage
-- Always include a message in System.assert, System.assertEquals, and System.assertNotEquals for clarity in test failures.
+- Always include a message in Assert, Assert.areEqual, and Assert.areNotEqual for clarity in test failures.
 **Bad:**
 System.assert(o.isClosed);
 System.assertNotEquals('123', o.StageName);
